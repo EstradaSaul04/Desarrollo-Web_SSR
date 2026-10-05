@@ -1,70 +1,82 @@
-// Función para manejar errores de la aplicación
-var createError = require('http-errors');
-
-//var createError = require('http-errors');
+// Función para manejar errores en la aplicación
 import createError from 'http-errors';
-// Importa el framework Express
-var express = require('express');
 
-//var express = require('express');
+// Importar el framework Express
 import express from 'express';
-// Importa módulo para manejar rutas
-var path = require('path');
 
-//var path = require('path');
-import path from 'path';
-// Importa módulo para manejar cookies
-var cookieParser = require('cookie-parser');
+// Importar módulo para manejar rutas
+import path from 'node:path';
 
-//var cookieParser = require('cookie-parser');
+// Importar módulo para manejar cookies
 import cookieParser from 'cookie-parser';
-// Importa módulo para manejar logs
-var logger = require('morgan');
 
-//var logger = require('morgan');
+// Importar módulo para generar logs
 import logger from 'morgan';
-// Importa las rutas de la aplicación
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 
-// Crea la aplicación Express
-var app = express();
+// Importar biblioteca Debug
+import createDebug from 'debug';
 
-// Configura el motor de vistas
+// Importar funciones para crear __dirname
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
+
+// Importar las rutas de la aplicación usando los Import Aliases
+import indexRouter from '#router/index.js';
+import usersRouter from '#router/users.js';
+
+// Crear el objeto Debug
+const debug = createDebug('dwssr-2026b:server');
+
+// Crear las variables __filename y __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Crear la aplicación Express
+const app = express();
+
+debug('🔨 Creando backend');
+
+// Configurar el motor de vistas
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
-// Configuración de middleware
+// Configurar los middlewares de la aplicación
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// Configura la carpeta de archivos públicos
-app.use(express.static(path.join(__dirname, 'public')));
+// Configurar la carpeta de archivos estáticos
+debug('🔨 Creando servidor de archivos estáticos');
 
-// Configura las rutas de la aplicación
+app.use(
+  express.static(path.join(__dirname, '..', 'public'))
+);
+
+// Registrar las rutas de la aplicación
+debug('🛣️ Registrando rutas');
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-// Captura de errores 404
-app.use(function(req, res, next) {
+// Capturar errores 404
+app.use((req, res, next) => {
   next(createError(404));
 });
 
 // Manejador de errores
-app.use(function(err, req, res, next) {
-
-  // Configuración de variables locales
+app.use((err, req, res, next) => {
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // Código de estado
+  res.locals.error =
+    req.app.get('env') === 'development'
+      ? err
+      : {};
+
   res.status(err.status || 500);
 
-  // Renderiza la página de error
   res.render('error');
 });
 
-// Exporta la aplicación
-module.exports = app;
+// Exportar la aplicación
+export default app;
