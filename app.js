@@ -6,16 +6,12 @@ import logger from 'morgan';
 import hbs from 'hbs';
 import { fileURLToPath } from 'url';
 
-import { registerViteHelper } from './lib/vite.js';
 import indexRouter from './routes/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-
-// Registrar el helper de Vite en Handlebars
-registerViteHelper(hbs);
 
 // Configuración del motor de vistas
 app.set('views', path.join(__dirname, 'views'));

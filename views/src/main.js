@@ -1,5 +1,5 @@
 //IMPORTANDO LOS ESTILOS DE LA PAGINA
-import './styles/main.css'
+import '../public/stylesheets/style.css';
 
 //IMPRIMIENDO EN CONSOLA
-console.log("🎉 VITE ⛈️ + EXPRESS 🚉")
+console.log("🎉 VITE ⛈️ + EXPRESS 🚉");
