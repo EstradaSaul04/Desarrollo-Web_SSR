@@ -23,7 +23,7 @@ export function registerViteHelper(hbs) {
           });
         }
         return new hbs.SafeString(tags);
-      } catch (e) {
+      } catch { // <-- Quitamos los paréntesis y la variable completamente
         return new hbs.SafeString('<!-- Vite manifest not found -->');
       }
     }

@@ -3,58 +3,80 @@ import globals from "globals";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
-  // 1) IGNORA LOS BUILD DE FRONT
+  // 1. Configuración general de JavaScript
+  {
+    files: ["**/*.{js,mjs,cjs}"],
+    plugins: { js },
+    extends: ["js/recommended"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+  },
+
+  // 2. Ignorar archivos y carpetas de compilación
   {
     ignores: [
       "dist/**",
       "node_modules/**",
-    ]
-  },
-  // 2) CONFIGURACION DEL BACKEND
-  { 
-    files: ["**/*.{js}"], 
-    plugins: { js }, 
-    extends: ["js/recommended"], 
-    languageOptions: { 
-      ecmaVersion: "latest", 
-      sourceType: "module",
-      globals: { ...globals.node } 
-    } 
+    ],
   },
 
-  // 3) CODIGO DEL FRONTEND
-  { 
-    files: ["/src/**/*.{js,msj}"], 
-    plugins: { js }, 
-    extends: ["js/recommended"], 
-    languageOptions: { 
-      ecmaVersion: "latest", 
+  // 3. Configuración del backend
+  {
+    files: ["server/**/*.{js,mjs}"],
+    languageOptions: {
+      ecmaVersion: "latest",
       sourceType: "module",
-      globals: { ...globals.node } 
-    } 
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      "no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+        },
+      ],
+    },
   },
 
-  // 4) OPCIONAL SI HAY JS EN PUBLIC
-  { 
-    files: ["/public/**/*.{js,msj}"], 
-    plugins: { js }, 
-    extends: ["js/recommended"], 
-    languageOptions: { 
-      ecmaVersion: "latest", 
+  // 4. Configuración de Vite
+  {
+    files: ["vite.config.js"],
+    languageOptions: {
+      ecmaVersion: "latest",
       sourceType: "module",
-      globals: { ...globals.node } 
-    } 
+      globals: {
+        ...globals.node,
+      },
+    },
   },
 
-  // 2.1) CONFIGURACION DE VITE
-  { 
-    files: ["vite.config.js"], 
-    plugins: { js }, 
-    extends: ["js/recommended"], 
-    languageOptions: { 
-      ecmaVersion: "latest", 
+  // 5. Configuración del frontend
+  {
+    files: ["src/**/*.{js,mjs}"],
+    languageOptions: {
+      ecmaVersion: "latest",
       sourceType: "module",
-      globals: { ...globals.node } 
-    } 
+      globals: {
+        ...globals.browser,
+      },
+    },
+  },
+
+  // 6. Configuración de JavaScript en public
+  {
+    files: ["public/**/*.{js,mjs}"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: {
+        ...globals.browser,
+      },
+    },
   },
 ]);

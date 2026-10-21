@@ -1,50 +1,88 @@
-import createError from 'http-errors';
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import cookieParser from 'cookie-parser';
-import logger from 'morgan';
+// Manejo de errores de la aplicación
+import createError from "http-errors";
 
-import indexRouter from '#router/index.js';
-import usersRouter from '#router/users.js';
+// Framework Express
+import express from "express";
 
+// Manejo de rutas y directorios
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+
+// Middlewares
+import cookieParser from "cookie-parser";
+import logger from "morgan";
+
+// Herramienta de depuración
+import createDebug from "debug";
+
+// Motor de plantillas Handlebars
+import hbs from "hbs";
+
+// Rutas de la aplicación
+import indexRouter from "#router/index.js";
+import usersRouter from "#router/users.js";
+
+// Helper para integrar Vite
+import { registerViteHelper } from "./lib/vite.js";
+
+// Configuración de directorios
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
+
+// Configuración de Debug
+const debug = createDebug("dwssr-2026b:server");
+
+// Crear la aplicación Express
+debug("Creando backend");
 
 const app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
+// Configurar el motor de vistas
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "hbs");
 
-app.use(logger('dev'));
+// Registrar el helper de Vite
+registerViteHelper(hbs);
+
+// Configurar middlewares
+app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Middleware donde 'next' está definido pero NUNCA se usa (genera error 1)
-app.use(function(req, res, next) {
-  // no llamamos a next()
-});
+// Archivos estáticos de producción
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "..", "dist")));
+}
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// Archivos estáticos públicos
+debug("Creando servidor de archivos estáticos");
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(express.static(path.join(__dirname, "..", "public")));
+
+// Registrar las rutas
+debug("Registrando rutas");
+
+app.use("/", indexRouter);
+app.use("/users", usersRouter);
+
+// Manejar errores 404
+app.use((req, res, next) => {
   next(createError(404));
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
+// Manejador centralizado de errores (sin _next para evitar alertas de ESLint)
+app.use((err, req, res) => {
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
+  res.locals.error =
+    req.app.get("env") === "development" ? err : {};
+
   res.status(err.status || 500);
-  res.render('error');
+
+  res.render("error");
 });
 
+// Exportar la aplicación
 export default app;
